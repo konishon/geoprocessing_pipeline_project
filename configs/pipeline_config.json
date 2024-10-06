@@ -1,0 +1,58 @@
+{
+    "functions": [
+        {
+            "functionName": "loadOsmData",
+            "input": {
+                "data": {
+                    "address": "Kathmandu, Nepal",
+                    "filepath": "data/kathmandu_graph.graphml"
+                }
+            },
+            "output": "osmNetwork"
+        },
+        {
+            "functionName": "generateIsochrone",
+            "input": {
+                "data": "osmNetwork",
+                "parameters": {
+                    "distance": 1000
+                }
+            },
+            "output": "isochroneOutput"
+        },
+        {
+            "functionName": "loadData",
+            "input": {
+                "parameters": {
+                    "dataType": "points"
+                }
+            },
+            "output": "points"
+        },
+        {
+            "functionName": "filterPoints",
+            "input": {
+                "data": "points",
+                "parameters": {
+                    "filterType": "byComplexQuery",
+                    "filterCriteria": {
+                        "attribute": "height",
+                        "operator": ">",
+                        "value": 20
+                    }
+                }
+            },
+            "output": "filteredPointsByHeight"
+        },
+        {
+            "functionName": "checkPointsWithinIsochrone",
+            "input": {
+                "data": "filteredPointsByHeight",
+                "parameters": {
+                    "isochrone": "isochroneOutput"
+                }
+            },
+            "output": "pointsWithinIsochrone"
+        }
+    ]
+}

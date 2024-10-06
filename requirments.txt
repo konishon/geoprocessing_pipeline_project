@@ -1,0 +1,14 @@
+geopandas 
+shapely 
+fiona 
+osmnx 
+networkx 
+matplotlib 
+unittest2 
+pytest 
+mock 
+jsonschema 
+requests 
+pyproj 
+numpy
+tqdm

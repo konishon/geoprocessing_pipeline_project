@@ -1,0 +1,45 @@
+{
+    "comment": "Find points that are 30 minutes away from road access",
+    "functions": [
+        {
+            "functionName": "loadOsmData",
+            "input": {
+                "data": {
+                    "address": "Kathmandu, Nepal",
+                    "filepath": "data/kathmandu_graph.graphml"
+                }
+            },
+            "output": "osmNetwork"
+        },
+        {
+            "functionName": "generateTimeBasedIsochrone",
+            "input": {
+                "data": "osmNetwork",
+                "parameters": {
+                    "time": 30,  
+                    "unit": "minutes"
+                }
+            },
+            "output": "isochrone30MinRoadAccess"
+        },
+        {
+            "functionName": "loadData",
+            "input": {
+                "parameters": {
+                    "dataType": "points"
+                }
+            },
+            "output": "points"
+        },
+        {
+            "functionName": "checkPointsWithinIsochrone",
+            "input": {
+                "data": "points",
+                "parameters": {
+                    "isochrone": "isochrone30MinRoadAccess"
+                }
+            },
+            "output": "pointsWithin30MinRoadAccess"
+        }
+    ]
+}
