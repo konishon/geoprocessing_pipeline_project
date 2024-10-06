@@ -12,3 +12,5 @@ requests
 pyproj 
 numpy
 tqdm
+instructor
+jupyter lab
