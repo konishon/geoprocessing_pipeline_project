@@ -7,7 +7,7 @@
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/konishon/geoprocessing_pipeline.git
+   git clone git@github.com:konishon/geoprocessing_pipeline_project.git
    cd geoprocessing_pipeline
    ```
 

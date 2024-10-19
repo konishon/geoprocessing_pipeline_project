@@ -75,3 +75,6 @@ pylint.log
 
 # Editor backups
 *~
+
+
+results/
