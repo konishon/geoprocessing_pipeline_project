@@ -1,0 +1,28 @@
+{
+    "functions": [
+        {
+            "functionName": "loadData",
+            "input": {
+                "parameters": {
+                    "dataType": "points"
+                }
+            },
+            "output": "points"
+        },
+        {
+            "functionName": "filterPoints",
+            "input": {
+                "data": "points",
+                "parameters": {
+                    "filterType": "byComplexQuery",
+                    "filterCriteria": {
+                        "attribute": "height",
+                        "operator": ">",
+                        "value": 20
+                    }
+                }
+            },
+            "output": "filteredPointsByHeight"
+        }
+    ]
+}

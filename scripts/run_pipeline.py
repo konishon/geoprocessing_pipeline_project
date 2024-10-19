@@ -27,43 +27,66 @@ def handle_osm_network_dummy(osm_network, output_dir, name):
     pass  # Placeholder for future implementation
 
 
+import folium
+import geopandas as gpd
+from shapely.geometry import Point
+from folium.plugins import MarkerCluster
+
 def plot_generic_geometries(results, output_dir, query_name):
     """
-    Walks through the results dictionary, detects geometries or coordinates, and adds them to a folium map.
-
-    Parameters:
-    - results (dict): The results dictionary with possible geometry or coordinate fields.
-    - output_dir (str): Directory to save the generated map.
-    - query_name (str): The name for the query (used for the output map filename).
+    Walk through the results dictionary, detect geometries or coordinates, 
+    and add them to a folium map as layers.
     """
-   
-    folium_map = folium.Map(location=[27.712, 85.318], zoom_start=13)  
-    marker_cluster = MarkerCluster().add_to(folium_map)
+    # Initialize a Folium map centered around a default point (Kathmandu)
+    folium_map = folium.Map(location=[27.712, 85.318], zoom_start=13)
 
-    # 1. Handle `isochroneOutput` (Polygon)
+    # Dictionary for storing layers
+    layers = {}
+
+    # 1. Plot Isochrone Output as a GeoJson Layer
     isochrone = results.get('isochroneOutput')
-    if isinstance(isochrone, Polygon):
+    if isochrone and isinstance(isochrone, Point):
+        isochrone_layer = folium.FeatureGroup(name='Isochrone', show=True)
         folium.GeoJson(
             isochrone,
             name="Isochrone",
             style_function=lambda x: {'fillColor': 'blue', 'color': 'black', 'weight': 2, 'fillOpacity': 0.3}
-        ).add_to(folium_map)
+        ).add_to(isochrone_layer)
+        layers['Isochrone'] = isochrone_layer
 
-    # 2. Handle point datasets (e.g., `points`, `filteredPointsByHeight`)
-    for key in ['points', 'filteredPointsByHeight']:
-        points_data = results.get(key, [])
-        if isinstance(points_data, list):
-            for point in points_data:
-                coordinates = point.get('coordinates')
-                if coordinates and isinstance(coordinates, list) and len(coordinates) == 2:
-                    # Add marker to the map
-                    folium.Marker(
-                        location=[coordinates[1], coordinates[0]],  # [lat, lon] order
-                        popup=f"ID: {point['id']}, Height: {point['height']}",
-                        icon=folium.Icon(color='red')
-                    ).add_to(marker_cluster)
+    # 2. Plot Points within Isochrone as a Marker Layer
+    points_within_isochrone = results.get('pointsWithinIsochrone', gpd.GeoDataFrame(geometry=[]))
+    if not points_within_isochrone.empty:
+        points_within_isochrone_layer = folium.FeatureGroup(name='Points Within Isochrone', show=True)
+        for _, row in points_within_isochrone.iterrows():
+            folium.Marker(
+                location=[row.geometry.y, row.geometry.x],
+                popup="Point within Isochrone"
+            ).add_to(points_within_isochrone_layer)
+        layers['PointsWithinIsochrone'] = points_within_isochrone_layer
 
-    # Save the folium map as an HTML file
+    # 3. Plot Filtered Points by Height
+    filtered_points_by_height = results.get('filteredPointsByHeight', [])
+    if filtered_points_by_height:
+        filtered_points_layer = folium.FeatureGroup(name='Filtered Points by Height', show=True)
+        for point in filtered_points_by_height:
+            coordinates = point.get('coordinates')
+            if coordinates and isinstance(coordinates, list) and len(coordinates) == 2:
+                folium.Marker(
+                    location=[coordinates[1], coordinates[0]],  # lat, lon order
+                    popup=f"ID: {point['id']}, Height: {point['height']}",
+                    icon=folium.Icon(color='red')
+                ).add_to(filtered_points_layer)
+        layers['FilteredPointsByHeight'] = filtered_points_layer
+
+    # Add each layer to the map
+    for layer_name, layer in layers.items():
+        layer.add_to(folium_map)
+
+    # Add Layer Control to the map
+    folium.LayerControl().add_to(folium_map)
+
+    # Save the map as an HTML file
     map_filepath = os.path.join(output_dir, f"{query_name}_map.html")
     folium_map.save(map_filepath)
     print(f"Folium map saved as {map_filepath}")
@@ -89,7 +112,6 @@ def process_and_save_results(query_name, results):
 
     os.makedirs(output_dir, exist_ok=True)
 
-    # Handle osmNetwork with the dummy function
     osm_network = results.get('osmNetwork', None)
     if osm_network:
         handle_osm_network_dummy(osm_network, output_dir, "osm_network")
@@ -154,7 +176,7 @@ def run_geoprocessing_pipeline(json_data):
 
 
 def main():
-    # Get the path to the configuration file
+  
     config_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'configs', 'filter_points.json'))
     
     print(f"Config file path: {config_file_path}")

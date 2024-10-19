@@ -1,0 +1,28 @@
+{
+    "functions": [
+        {
+            "functionName": "loadOsmData",
+            "input": {
+                "data": {
+                    "address": "Kathmandu, Nepal",
+                    "filepath": "data/kathmandu_graph.graphml"
+                }
+            },
+            "output": "osmNetwork"
+        },
+        {
+            "functionName": "generateIsochrone",
+            "input": {
+                "data": "osmNetwork",
+                "parameters": {
+                    "distance": 3000,
+                    "coordinates": {
+                        "lat": 27.712,
+                        "lon": 85.318
+                    }
+                }
+            },
+            "output": "isochroneOutput"
+        }
+    ]
+}
