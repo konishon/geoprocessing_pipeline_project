@@ -1,32 +1,41 @@
 import networkx as nx
 import geopandas as gpd
 from shapely.geometry import Point
+from math import sqrt
 
-def generate_isochrone(osm_network, distance):
+def euclidean_distance(coord1, coord2):
+    """
+    Calculate the Euclidean distance between two coordinates (lon, lat).
+    """
+    return sqrt((coord1[0] - coord2[0]) ** 2 + (coord1[1] - coord2[1]) ** 2)
+
+def find_nearest_node(osm_network, point):
+    """
+    Find the nearest node in the graph to a given point.
+    """
+    point_coords = (point.x, point.y)
+    min_distance = float('inf')
+    nearest_node = None
+
+    for node in osm_network.nodes:
+        node_coords = (osm_network.nodes[node]['x'], osm_network.nodes[node]['y'])
+        distance = euclidean_distance(point_coords, node_coords)
+
+        if distance < min_distance:
+            min_distance = distance
+            nearest_node = node
+
+    return nearest_node
+
+
+def generate_isochrone(osm_network, point, distance):
     """
     Generate an isochrone polygon from a given road network graph.
-
-    Parameters:
-    - osm_network: The road network graph (OSM data).
-    - distance: Distance in meters to generate the isochrone.
-
-    Returns:
-    - isochrone_polygon: A Shapely Polygon representing the isochrone area.
     """
-    # Find the center node, assuming the first node is close to the center
-    center_node = list(osm_network.nodes)[0]
-    
-    # Generate an ego graph (subgraph) around the center node with the specified distance
-    subgraph = nx.ego_graph(osm_network, center_node, radius=distance, distance='length')
-    
-    # Extract the nodes within the subgraph
+    nearest_node = find_nearest_node(osm_network, point)
+    subgraph = nx.ego_graph(osm_network, nearest_node, radius=distance, distance='length')
     nodes = list(subgraph.nodes())
-    
-    # Convert the node coordinates to Shapely Points
     node_points = [Point((osm_network.nodes[node]['x'], osm_network.nodes[node]['y'])) for node in nodes]
-    
-    # Create a GeoSeries of points and generate the convex hull (enclosure polygon) as the isochrone
     isochrone_polygon = gpd.GeoSeries(node_points, crs="EPSG:4326").unary_union.convex_hull
     
     return isochrone_polygon
-

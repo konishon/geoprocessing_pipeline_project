@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import time
+import shutil  # Added to delete the existing folder
 import geopandas as gpd
 import folium
 from folium.plugins import MarkerCluster
@@ -80,6 +81,12 @@ def process_and_save_results(query_name, results):
     print(results)
     # Create output directory for this query
     output_dir = os.path.join('results', query_name)
+
+    # Check if the output directory already exists, if so, delete it
+    if os.path.exists(output_dir):
+        print(f"Directory {output_dir} already exists. Deleting...")
+        shutil.rmtree(output_dir)  # Delete the existing directory
+
     os.makedirs(output_dir, exist_ok=True)
 
     # Handle osmNetwork with the dummy function
@@ -89,8 +96,6 @@ def process_and_save_results(query_name, results):
 
     # Plot all geometries found in the results
     plot_generic_geometries(results, output_dir, query_name)
-
-
 
 
 def run_geoprocessing_pipeline(json_data):
@@ -118,7 +123,10 @@ def run_geoprocessing_pipeline(json_data):
         elif func_name == "generateIsochrone":
             osm_network = outputs[func['input']['data']]
             distance = func['input']['parameters']['distance']
-            output = generate_isochrone(osm_network, distance)
+            lat = func['input']['parameters']['coordinates']['lat']
+            lon = func['input']['parameters']['coordinates']['lon']
+            isochrone_point = Point(lon, lat)
+            output = generate_isochrone(osm_network, isochrone_point, distance)
         
         # Load generic data (points, buildings, etc.)
         elif func_name == "loadData":
@@ -146,17 +154,18 @@ def run_geoprocessing_pipeline(json_data):
 
 
 def main():
-    # Define the query name (folder name) based on the current timestamp for uniqueness
-    query_name = time.strftime("%Y%m%d-%H%M%S")
-
     # Get the path to the configuration file
-    config_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'configs', 'pipeline_config.json'))
+    config_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'configs', 'filter_points.json'))
     
     print(f"Config file path: {config_file_path}")
     
     if not os.path.exists(config_file_path):
         print(f"Error: The configuration file {config_file_path} does not exist.")
         return
+
+    # Extract the configuration file name (without extension) to use as the query_name
+    config_filename = os.path.splitext(os.path.basename(config_file_path))[0]
+    query_name = config_filename  # Use the config file name as the query name
     
     start_time = time.time()
 

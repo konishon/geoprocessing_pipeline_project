@@ -15,7 +15,8 @@
             "input": {
                 "data": "osmNetwork",
                 "parameters": {
-                    "distance": 1000
+                    "distance": 3000,
+                    "coordinates":{"lat":27.712,"lon":85.318}
                 }
             },
             "output": "isochroneOutput"
