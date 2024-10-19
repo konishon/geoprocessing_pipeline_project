@@ -1,0 +1,29 @@
+{
+    "functions": [
+        {
+            "functionName": "loadData",
+            "input": {
+                "parameters": {
+                    "dataType": "buildings"
+                }
+            },
+            "output": "buildings"
+        },
+        {
+            "functionName": "loadData",
+            "input": {
+                "parameters": {
+                    "dataType": "studyArea"
+                }
+            },
+            "output": "studyArea"
+        },
+        {
+            "functionName": "clip",
+            "input": {
+                "data": ["buildings", "studyArea"]
+            },
+            "output": "clippedBuildings"
+        }
+    ]
+}

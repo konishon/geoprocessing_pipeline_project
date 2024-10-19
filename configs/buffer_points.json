@@ -1,0 +1,23 @@
+{
+    "functions": [
+        {
+            "functionName": "loadData",
+            "input": {
+                "parameters": {
+                    "dataType": "points"
+                }
+            },
+            "output": "points"
+        },
+        {
+            "functionName": "createBuffer",
+            "input": {
+                "data": "points",
+                "parameters": {
+                    "distance": 500  
+                }
+            },
+            "output": "bufferedPoints"
+        }
+    ]
+}

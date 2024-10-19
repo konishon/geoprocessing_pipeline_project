@@ -78,3 +78,5 @@ pylint.log
 
 
 results/
+
+*.graphml
